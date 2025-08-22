@@ -42,9 +42,11 @@ function findComposeToolbar() {
 // 🧹 Clean API text (remove markdown **, *, extra spaces)
 function cleanText(text) {
   return text
-    .replace(/\*\*(.*?)\*\*/g, "$1") // remove **bold**
-    .replace(/^\s*[\*\-]\s*/gm, "• ") // convert * or - bullets → "•"
-    .replace(/\n{3,}/g, "\n\n") // collapse multiple blank lines
+    .replace(/\*\*(.*?)\*\*/g, "$1")   // remove **bold**
+    .replace(/\*(.*?)\*/g, "$1")       // remove *italics*
+    .replace(/^\s*[\*\-]\s*/gm, "• ")  // convert * or - bullets → "•"
+    .replace(/\n{2,}/g, "\n\n")        // collapse multiple blank lines
+    .replace(/\s{2,}/g, " ")           // collapse extra spaces
     .trim();
 }
 
@@ -95,7 +97,7 @@ function createAIButton(label, mode, toneSelector) {
 
       console.log("📤 Sending request body:", requestBody);
 
-      const response = await fetch("http://localhost:8080/api/email/generate", {
+      const response = await fetch("https://smart-email-writer.onrender.com/api/email/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody)
@@ -116,9 +118,11 @@ function createAIButton(label, mode, toneSelector) {
       if (composeBox) {
         composeBox.focus();
 
-        // 🧹 Always clear previous content before inserting
+        // 🧹 Always fully clear Gmail's compose box
         composeBox.innerHTML = "";
+        composeBox.textContent = "";
 
+        // Insert fresh content
         document.execCommand("insertText", false, generatedText);
         console.log("📌 Inserted generated text into compose box");
       } else {
